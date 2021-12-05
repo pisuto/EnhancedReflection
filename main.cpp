@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include "reflect.h"
 
@@ -19,40 +20,24 @@ REFLECT_STRUCT_END
 
 int main()
 {
-    /* deserialize */
-    {
-        Node node;
-        ref::type_descriptor* typeDesc = ref::type_resolver<Node>::get();
-
-        std::string data = "Node { \n\
-                key = string{ apple } \n\
-                value = int{ 3 } \n\
-                children = vector<Node>[2]{ \n\
-                    Node { \n\
-                        key = string{banana} \n\
-                        value = int{7} \n\
-                        children = vector<Node>[0]{} \n\
-                    } \n\
-                    Node { \n\
-                        key = string{cherry} \n\
-                        value = int{11} \n\
-                        children = vector<Node>[0]{} \n\
-                    } \n\
-                } \n\
-            }";
-
-        ref::format_helper helper(data);
-
-        typeDesc->deserialize("Node", &node, helper);
-    }
+    ref::format_helper helper("setting.ini");
 
     /* serialize */
     {
         Node node = { "apple", 3, {{"banana", 7, {}}, {"cherry", 11, {}}} };
 
-        ref::type_descriptor* typeDesc = ref::type_resolver<Node>::get();
+        ref::type_descriptor* type_desc = ref::type_resolver<Node>::get();
 
-        typeDesc->serialize(&node);
+        helper.write(type_desc, &node);
+    }
+
+    /* deserialize */
+    {
+        Node node;
+
+        ref::type_descriptor* type_desc = ref::type_resolver<Node>::get();
+
+        helper.read(type_desc, &node);
     }
 
 	return 0;

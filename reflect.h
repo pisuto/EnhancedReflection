@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <fstream>
 #include <cstddef>
 
 #include "format_helper.h"
@@ -51,7 +52,7 @@ namespace ref {
 			type_name(name), type_size(size) {}
 		virtual ~type_descriptor() {}
 		virtual std::string full_name() const { return type_name; }
-		virtual void serialize(const void* obj, int level = 0) const = 0;
+		virtual void serialize(std::ofstream& out, const void* obj, int level = 0) const = 0;
 		virtual void deserialize(std::string var, const void* obj, format_helper& helper, int level = 0) = 0;
 		
 		const char* type_name;
@@ -79,15 +80,15 @@ namespace ref {
 		type_struct_base(const char* name, size_t size, const std::initializer_list<member>& init) : type_descriptor(nullptr, 0),
 			members(init) {}
 
-		virtual void serialize(const void* obj, int level) const override {
-			std::cout << full_name() << " {" << std::endl;
+		virtual void serialize(std::ofstream& out, const void* obj, int level) const override {
+			out << full_name() << " {" << std::endl;
 			for (const auto& element : members)
 			{
-				std::cout << std::string(4 * (level + 1), ' ') << element.var_name << " = ";
-				element.type_desc->serialize((char*)obj + element.offset, level + 1);
-				std::cout << std::endl;
+				out << std::string(4 * (level + 1), ' ') << element.var_name << " = ";
+				element.type_desc->serialize(out, (char*)obj + element.offset, level + 1);
+				out << std::endl;
 			}
-			std::cout << std::string(4 * level, ' ') << "}";
+			out << std::string(4 * level, ' ') << "}";
 		}
 
 		virtual void deserialize(std::string var, const void* obj, format_helper& helper, int level) override {
@@ -149,22 +150,22 @@ namespace ref {
 			return std::string("vector<") + item_type->full_name() + ">";
 		}
 
-		virtual void serialize(const void* obj, int level) const override {
+		virtual void serialize(std::ofstream& out, const void* obj, int level) const override {
 			auto size = get_size(obj);
-			std::cout << full_name() << "[" + std::to_string(size) + "]";
+			out << full_name() << "[" + std::to_string(size) + "]";
 			if (size == 0) {
-				std::cout << "{}";
+				out << "{}";
 				return;
 			}
 
-			std::cout << "{" << std::endl;
+			out << "{" << std::endl;
 			for (size_t index = 0; index < size; ++index)
 			{
-				std::cout << std::string(4 * (level + 1), ' ');
-				item_type->serialize(get_item(obj, index), level + 1);
-				std::cout << std::endl;
+				out << std::string(4 * (level + 1), ' ');
+				item_type->serialize(out, get_item(obj, index), level + 1);
+				out << std::endl;
 			}
-			std::cout << std::string(4 * level, ' ') << "}";
+			out << std::string(4 * level, ' ') << "}";
 		}
 
 		virtual void deserialize(std::string var, const void* obj, format_helper& helper, int level) override {
@@ -216,8 +217,8 @@ namespace ref {
 		using type_class = typename type; \
 		using type_pointer = typename type*; \
 		type_struct_base() : type_descriptor(#type, sizeof(type)) {} \
-		virtual void serialize(const void* obj, int) const override { \
-			std::cout << #type << "{" << *(const type*)obj << "}"; \
+		virtual void serialize(std::ofstream& out, const void* obj, int) const override { \
+			out << #type << "{" << *(const type*)obj << "}"; \
 		} \
 		virtual void deserialize(std::string var, const void* obj, format_helper& helper, int) override { \
 			auto type_obj = (type_pointer)obj; \
