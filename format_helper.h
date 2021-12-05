@@ -10,6 +10,7 @@ namespace ref {
 	struct mapping {
 		std::string value;
 		int level;
+		bool checked;
 	};
 
 	struct format_helper {
@@ -35,12 +36,39 @@ namespace ref {
 						value = line.substr(pos1 + 1, pos2 - pos1 - 1);
 						auto pos1 = value.find_first_not_of(" ");
 						auto pos2 = value.find_last_not_of(" ");
-						value = value.substr(pos1, pos2 - pos1 + 1);
-						dic[name] = mapping{ value, level };
+						if (pos1 == std::string::npos && pos2 == std::string::npos)
+						{
+							pos1 = line.find_first_of("[");
+							pos2 = line.find_first_of("]");
+							if (pos1 != std::string::npos && pos2 != std::string::npos)
+							{
+								value = line.substr(pos1 + 1, pos2 - pos1 - 1);
+								dic.emplace_back(std::make_pair(name, mapping{ value, level, false }));
+							}
+							else
+							{
+								dic.emplace_back(std::make_pair(name, mapping{ "", level, false }));
+							}
+						}
+						else 
+						{
+							value = value.substr(pos1, pos2 - pos1 + 1);
+							dic.emplace_back(std::make_pair(name, mapping{ value, level, false }));
+						}
 					}
-					else if(pos2 == std::string::npos)
+					else if (pos2 == std::string::npos)
 					{
-						dic[name] = mapping{ value, level };
+						pos1 = line.find_first_of("[");
+						pos2 = line.find_first_of("]");
+						if (pos1 != std::string::npos && pos2 != std::string::npos)
+						{
+							value = line.substr(pos1 + 1, pos2 - pos1 - 1);
+							dic.emplace_back(std::make_pair(name, mapping{ value, level, false }));
+						}
+						else
+						{
+							dic.emplace_back(std::make_pair(name, mapping{ "", level, false }));
+						}
 						++level;
 					}
 				}
@@ -48,9 +76,17 @@ namespace ref {
 			}
 		}
 
-		mapping& operator[](std::string index) { return dic[index]; }
+		mapping& operator[](std::string index) { 
+			for (auto it = dic.begin(); it != dic.end(); it++)
+			{
+				if (index == it->first && !it->second.checked) {
+					return it->second;
+				}
+			}
+			return dic[0].second; /* 需要返回一个值 */
+		}
 
 	private:
-		std::unordered_map<std::string, mapping> dic;
+		std::vector<std::pair<std::string, mapping>> dic;
 	};
 }

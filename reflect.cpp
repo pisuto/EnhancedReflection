@@ -6,7 +6,7 @@ namespace ref {
 
 	template<>
 	int string_to_data<int>(std::string data) {
-		return std::stoi(data);
+		return data.empty()? 0 : std::stoi(data);
 	}
 
 	template<>

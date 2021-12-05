@@ -52,7 +52,7 @@ namespace ref {
 		virtual ~type_descriptor() {}
 		virtual std::string full_name() const { return type_name; }
 		virtual void serialize(const void* obj, int level = 0) const = 0;
-		virtual void deserialize(std::string var, void* obj, format_helper& helper, int level = 0) = 0;
+		virtual void deserialize(std::string var, const void* obj, format_helper& helper, int level = 0) = 0;
 		
 		const char* type_name;
 		size_t type_size;
@@ -90,7 +90,7 @@ namespace ref {
 			std::cout << std::string(4 * level, ' ') << "}";
 		}
 
-		virtual void deserialize(std::string var, void* obj, format_helper& helper, int level) override {
+		virtual void deserialize(std::string var, const void* obj, format_helper& helper, int level) override {
 			for (auto& element : members)
 			{
 				element.type_desc->deserialize(element.var_name, (char*)obj + element.offset, helper , level + 1);
@@ -119,8 +119,10 @@ namespace ref {
 	struct type_struct_vector : type_descriptor {
 		using get_size_func_ptr = size_t(*)(const void*);
 		using get_item_func_ptr = const void* (*)(const void*, size_t);
+		using resize_func_ptr   = size_t(*)(const void*, size_t);
 		get_size_func_ptr get_size;
 		get_item_func_ptr get_item;
+		resize_func_ptr   resize;
 		type_descriptor* item_type;
 
 		template<typename Item>
@@ -135,6 +137,12 @@ namespace ref {
 				const auto& vec = *(const std::vector<Item>*)vec_ptr;
 				return &vec[index];
 			};
+
+			resize = [](const void* vec_ptr, size_t size) -> size_t {
+				auto& vec = *(std::vector<Item>*)vec_ptr;
+				vec.resize(size);
+				return vec.size();
+			};
 		}
 
 		virtual std::string full_name() const override {
@@ -143,24 +151,33 @@ namespace ref {
 
 		virtual void serialize(const void* obj, int level) const override {
 			auto size = get_size(obj);
-			std::cout << full_name();
+			std::cout << full_name() << "[" + std::to_string(size) + "]";
 			if (size == 0) {
 				std::cout << "{}";
+				return;
 			}
-			else {
-				std::cout << "{" << std::endl;
-				for (size_t index = 0; index < size; ++index)
-				{
-					std::cout << std::string(4 * (level + 1), ' ') << "[" << index << "] ";
-					item_type->serialize(get_item(obj, index), level + 1);
-					std::cout << std::endl;
-				}
-				std::cout << std::string(4 * level, ' ') << "}";
+
+			std::cout << "{" << std::endl;
+			for (size_t index = 0; index < size; ++index)
+			{
+				std::cout << std::string(4 * (level + 1), ' ');
+				item_type->serialize(get_item(obj, index), level + 1);
+				std::cout << std::endl;
 			}
+			std::cout << std::string(4 * level, ' ') << "}";
 		}
 
-		virtual void deserialize(std::string var, void* obj, format_helper& helper, int level) override {
-
+		virtual void deserialize(std::string var, const void* obj, format_helper& helper, int level) override {
+			auto& tmp = helper[var];
+			if (tmp.checked || tmp.value.empty()) {
+				return;
+			}
+			tmp.checked = true;
+			auto size = resize(obj, std::stoi(tmp.value));	
+			for (size_t index = 0; index < size; ++index)
+			{
+				item_type->deserialize(item_type->full_name(), get_item(obj, index), helper, level);
+			}
 		}
 	};
 
@@ -202,9 +219,10 @@ namespace ref {
 		virtual void serialize(const void* obj, int) const override { \
 			std::cout << #type << "{" << *(const type*)obj << "}"; \
 		} \
-		virtual void deserialize(std::string var, void* obj, format_helper& helper, int) override { \
+		virtual void deserialize(std::string var, const void* obj, format_helper& helper, int) override { \
 			auto type_obj = (type_pointer)obj; \
 			*type_obj = string_to_data<type_class>(helper[var].value); \
+			helper[var].checked = true; \
 		} \
 	}; \
 	template<> \
