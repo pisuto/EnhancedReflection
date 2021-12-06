@@ -40,21 +40,17 @@ int main()
 
         Node node = { "apple", 3, {{"banana", 7, {}}, {"cherry", 11, {}}} };
 
-        ref::type_descriptor* type_desc = ref::type_resolver<Node>::get();
-
         helper.write(base, node);
     }
 
     /* deserialize */
-    
+    {
         Base base;
 
         Node node;
 
-        ref::type_descriptor* type_desc = ref::type_resolver<Node>::get();
-
         helper.read(base, node);
-    
+    }
 
 	return 0;
 }
