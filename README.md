@@ -43,22 +43,18 @@ ref::format_helper helper("setting.ini");
 /* serialize */
 {
     Base base = { false, {{"water", 4, {}}}};
-
     Node node = { "apple", 3, {{"banana", 7, {}}, {"cherry", 11, {}}} };
-
     helper.write(base, node);
 }
 
 /* deserialize */
 {
     Base base;
-
     Node node;
-
     helper.read(base, node);
 }
 ```
-***Noted: the order of these types when read must be consistent with these when wrote， otherwise the result will be abnormal.***
+***Noted: the order of these types when read must be consistent with these when wrote，otherwise the result will be abnormal.***
 
 
 ## Related Efforts
