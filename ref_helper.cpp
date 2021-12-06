@@ -1,27 +1,7 @@
-#include "format_helper.h"
-#include "reflect.h"
+#include "ref_helper.h"
+#include "ref_define.h"
 
 namespace ref {
-
-
-
-	void format_helper::read(type_descriptor* type_desc, const void* data)
-	{
-		if (!dic.empty()) {
-			return;
-		}
-		std::ifstream in(file_name, std::ios::in);
-		file_read(in);
-		type_desc->deserialize(type_desc->full_name(), data, *this);
-		in.close();
-	}
-
-	void format_helper::write(type_descriptor* type_desc, const void* data)
-	{
-		std::ofstream out(file_name, std::ios::out);
-		type_desc->serialize(out, data);
-		out.close();
-	}
 
 	void format_helper::file_read(std::ifstream& in)
 	{
@@ -82,5 +62,6 @@ namespace ref {
 				}
 			}
 		}
+		dic.emplace_back(std::make_pair("null", mapping{ "", 0, false }));
 	}
 }

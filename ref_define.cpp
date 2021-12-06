@@ -1,4 +1,4 @@
-#include "reflect.h"
+#include "ref_define.h"
 
 using namespace std;
 
@@ -14,7 +14,13 @@ namespace ref {
 		return data;
 	}
 
+	template<>
+	bool string_to_data<bool>(std::string data) {
+		return data == "true";
+	}
+
 	REFLECT_TYPE(int)
+	REFLECT_TYPE(bool)
 	REFLECT_TYPE(string)
 
 }
