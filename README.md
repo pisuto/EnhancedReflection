@@ -1,7 +1,7 @@
 # EnhancedReflection
 [![standard-readme compliant](https://img.shields.io/badge/csdn%20blog-link-brightgreen.svg?style=flat-square)](https://github.com/pisuto/EnhancedReflection)
 
-An enhanced version of flexible reflection.
+An enhanced version of FlexibleReflection.
 ## Table of Contents
 - [Background](#background)
 - [Install](#install)
@@ -10,7 +10,7 @@ An enhanced version of flexible reflection.
 - [Author](#author)
 - [License](#license)
 ## Background
-The function provided by FlexibleReflection is just serializing data and it's lacking of deserializing. Therefore, based on FlexibleReflection, this developping project is a enhanced version including deserializing function and so on.
+The function provided by FlexibleReflection is just serializing data and it's lacking of deserializing. Therefore, based on FlexibleReflection, this developping project is an enhanced version including deserializing function and so on.
 
 ## Install
 This project is developped using visual studio 2019. Just clone and create an C++ empty project, then copy these .h and .cpp files into your project. Finally make fun!
