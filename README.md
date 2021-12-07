@@ -10,16 +10,16 @@ An enhanced version of FlexibleReflection.
 - [Author](#author)
 - [License](#license)
 ## Background
-The function provided by FlexibleReflection is just serializing data and it's lacking of deserializing. Therefore, based on FlexibleReflection, this developping project is an enhanced version including deserializing function and so on.
+The function provided by FlexibleReflection is serializing data and lacking of deserializing. Therefore, based on FlexibleReflection, this developping project is an enhanced version including deserializing function and so on.
 
 ## Install
-This project is developped using visual studio 2019. Just clone and create an C++ empty project, then copy these .h and .cpp files into your project. Finally make fun!
+This project is developped using VisualStudio2019. Clone source code and create an C++ empty project, then copy these .h and .cpp files into your project.
 ```sh
 $ git clone https://github.com/pisuto/EnhancedReflection.git
 ```
 
 ## Usage
-Including the header files `ref_define.h` and define your struct, for example `Node`.
+Including the header file `ref_define.h` and enabling reflection feature, for example `Node`.
 ```c++
 struct Node {
     std::string key;
@@ -36,7 +36,7 @@ REFLECT_STRUCT_MEMBER(value)
 REFLECT_STRUCT_MEMBER(children)
 REFLECT_STRUCT_END
 ```
-After finishing defining the struct, then just construct `ref::format_helper` and set the filename `setting.ini` that you can change to what you want. Finally, using member functions provided by helper `write` and `read` achieve serializing and deserializing effects.
+After finishing defining the struct, then construct `ref::format_helper` and fill the filename like `setting.ini`. Finally, using member functions `write` and `read` provided by the helper achieves serializing and deserializing effects.
 ```c++
 ref::format_helper helper("setting.ini");
 
