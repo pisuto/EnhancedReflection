@@ -10,7 +10,7 @@ An enhanced version of FlexibleReflection.
 - [Author](#author)
 - [License](#license)
 ## Background
-The function provided by FlexibleReflection is serializing data and lacking of deserializing. Therefore, based on FlexibleReflection, this developping project is an enhanced version including deserializing function and so on.
+The function provided by FlexibleReflection is serializing data but lacking of deserializing. Therefore, based on FlexibleReflection, this developping project is an enhanced version including deserializing function and so on.
 
 ## Install
 This project is developped using VisualStudio2019. Clone source code and create an C++ empty project, then copy these .h and .cpp files into your project.
