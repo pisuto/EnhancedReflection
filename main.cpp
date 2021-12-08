@@ -9,9 +9,10 @@ struct Node {
     int value;
     std::vector<Node> children;
 
-    REFLECT(Node)       
+    REFLECT(Node) // enable reflection     
 };
 
+// define related type descriptor
 REFLECT_STRUCT_BEGIN(Node)
 REFLECT_STRUCT_MEMBER(key)
 REFLECT_STRUCT_MEMBER(value)
@@ -32,7 +33,7 @@ REFLECT_STRUCT_END
 
 int main()
 {
-    ref::format_helper helper("setting.ini");
+    ref::format_helper helper(new ref::txt_parser("setting.ini"));
 
     /* serialize */
     {
@@ -54,3 +55,4 @@ int main()
 
 	return 0;
 }
+

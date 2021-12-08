@@ -1,10 +1,10 @@
-#include "ref_helper.h"
-#include "ref_define.h"
+#include "ref_parser.h"
 
 namespace ref {
 
-	void format_helper::file_read(std::ifstream& in)
+	void txt_parser::read_file()
 	{
+		in.open(file_name, std::ios::in);
 		std::string line;
 		int level = 0;
 		while (std::getline(in, line))
@@ -63,5 +63,8 @@ namespace ref {
 			}
 		}
 		dic.emplace_back(std::make_pair("null", mapping{ "", 0, false }));
+		in.close();
+		is_read = true;
 	}
+
 }

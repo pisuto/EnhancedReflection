@@ -31,21 +31,22 @@ namespace ref {
 		type_struct_base(const char* name, size_t size, const std::initializer_list<member>& init) : type_descriptor(nullptr, 0),
 			members(init) {}
 
-		virtual void serialize(std::ofstream& out, const void* obj, int level) const override {
-			out << full_name() << " {" << std::endl;
+		virtual void serialize(file_parser* parser, const void* obj, int level) const override {
+			parser->write_class_name(full_name());
 			for (const auto& element : members)
 			{
-				out << std::string(4 * (level + 1), ' ') << element.var_name << " = ";
-				element.type_desc->serialize(out, (char*)obj + element.offset, level + 1);
-				out << std::endl;
+				parser->write_member_name(element.var_name, level + 1);
+				element.type_desc->serialize(parser, (char*)obj + element.offset, level + 1);
+				parser->write_enter();
 			}
-			out << std::string(4 * level, ' ') << "}";
+			parser->write_ident_space(level);
+			parser->write_class_end();
 		}
 
-		virtual void deserialize(std::string var, const void* obj, format_helper& helper, int level) override {
+		virtual void deserialize(std::string var, const void* obj, file_parser* parser, int level) override {
 			for (auto& element : members)
 			{
-				element.type_desc->deserialize(element.var_name, (char*)obj + element.offset, helper , level + 1);
+				element.type_desc->deserialize(element.var_name, (char*)obj + element.offset, parser , level + 1);
 			}
 		}
 	};
@@ -84,26 +85,25 @@ namespace ref {
 			return std::string("vector<") + item_type->full_name() + ">";
 		}
 
-		virtual void serialize(std::ofstream& out, const void* obj, int level) const override {
+		virtual void serialize(file_parser* parser, const void* obj, int level) const override {
 			auto size = get_size(obj);
-			out << full_name() << "[" + std::to_string(size) + "]";
+			parser->write_class_name(full_name(), size);
 			if (size == 0) {
-				out << "{}";
 				return;
 			}
 
-			out << "{" << std::endl;
 			for (size_t index = 0; index < size; ++index)
 			{
-				out << std::string(4 * (level + 1), ' ');
-				item_type->serialize(out, get_item(obj, index), level + 1);
-				out << std::endl;
+				parser->write_ident_space(level + 1);
+				item_type->serialize(parser, get_item(obj, index), level + 1);
+				parser->write_enter();
 			}
-			out << std::string(4 * level, ' ') << "}";
+			parser->write_ident_space(level);
+			parser->write_class_end();
 		}
 
-		virtual void deserialize(std::string var, const void* obj, format_helper& helper, int level) override {
-			auto& tmp = helper[var];
+		virtual void deserialize(std::string var, const void* obj, file_parser* parser, int level) override {
+			auto& tmp = (*parser)[var];
 			if (tmp.checked || tmp.value.empty()) {
 				return;
 			}
@@ -111,7 +111,7 @@ namespace ref {
 			auto size = resize(obj, std::stoi(tmp.value));	
 			for (size_t index = 0; index < size; ++index)
 			{
-				item_type->deserialize(item_type->full_name(), get_item(obj, index), helper, level);
+				item_type->deserialize(item_type->full_name(), get_item(obj, index), parser, level);
 			}
 		}
 	};
@@ -151,13 +151,13 @@ namespace ref {
 		using type_class = typename type; \
 		using type_pointer = typename type*; \
 		type_struct_base() : type_descriptor(#type, sizeof(type)) {} \
-		virtual void serialize(std::ofstream& out, const void* obj, int) const override { \
-			out << #type << "{" << boolalpha  << *(const type*)obj << "}"; \
+		virtual void serialize(ref::file_parser* parser, const void* obj, int) const override { \
+			parser->write_member_value(#type, *(const type*)obj); \
 		} \
-		virtual void deserialize(std::string var, const void* obj, format_helper& helper, int) override { \
+		virtual void deserialize(std::string var, const void* obj, file_parser* parser, int) override { \
 			auto type_obj = (type_pointer)obj; \
-			*type_obj = string_to_data<type_class>(helper[var].value); \
-			helper[var].checked = true; \
+			*type_obj = string_to_data<type_class>((*parser)[var].value); \
+			(*parser)[var].checked = true; \
 		} \
 	}; \
 	template<> \
