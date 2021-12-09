@@ -32,15 +32,15 @@ namespace ref {
 			members(init) {}
 
 		virtual void serialize(file_parser* parser, const void* obj, int level) const override {
-			parser->write_class_name(full_name());
+			parser->write_class_name(full_name(), level);
 			for (const auto& element : members)
 			{
-				parser->write_member_name(element.var_name, level + 1);
+				parser->write_member_name(element.var_name, element.type_desc->full_name(), level + 1);
 				element.type_desc->serialize(parser, (char*)obj + element.offset, level + 1);
 				parser->write_enter();
 			}
 			parser->write_ident_space(level);
-			parser->write_class_end();
+			parser->write_class_end(full_name());
 		}
 
 		virtual void deserialize(std::string var, const void* obj, file_parser* parser, int level) override {
@@ -87,7 +87,7 @@ namespace ref {
 
 		virtual void serialize(file_parser* parser, const void* obj, int level) const override {
 			auto size = get_size(obj);
-			parser->write_class_name(full_name(), size);
+			parser->write_class_name(full_name(), level, size);
 			if (size == 0) {
 				return;
 			}
@@ -99,7 +99,7 @@ namespace ref {
 				parser->write_enter();
 			}
 			parser->write_ident_space(level);
-			parser->write_class_end();
+			parser->write_class_end(full_name());
 		}
 
 		virtual void deserialize(std::string var, const void* obj, file_parser* parser, int level) override {

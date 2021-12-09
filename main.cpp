@@ -33,7 +33,7 @@ REFLECT_STRUCT_END
 
 int main()
 {
-    ref::format_helper helper(new ref::txt_parser("setting.ini"));
+    ref::format_helper helper(new ref::xml_parser("setting.xml"));
 
     /* serialize */
     {

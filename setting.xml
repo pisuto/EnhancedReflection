@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf - 8" ?>
+<Base>
+    <checked>false</checked>
+    <nodes>
+        <Node>
+            <key>water</key>
+            <value>4</value>
+            <children></children>
+        </Node>
+    </nodes>
+</Base>
+<Node>
+    <key>apple</key>
+    <value>3</value>
+    <children>
+        <Node>
+            <key>banana</key>
+            <value>7</value>
+            <children></children>
+        </Node>
+        <Node>
+            <key>cherry</key>
+            <value>11</value>
+            <children></children>
+        </Node>
+    </children>
+</Node>

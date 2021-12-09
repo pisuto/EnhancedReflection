@@ -2,6 +2,13 @@
 
 namespace ref {
 
+	/* xml read for deseralize */
+	void xml_parser::read_file()
+	{
+
+	}
+
+	/* txt read for deseralize */
 	void txt_parser::read_file()
 	{
 		in.open(file_name, std::ios::in);
