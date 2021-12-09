@@ -13,13 +13,13 @@ An enhanced version of FlexibleReflection.
 The function provided by FlexibleReflection is serializing data but lacking of deserializing. Therefore, based on FlexibleReflection, this developping project is an enhanced version including deserializing function and so on.
 
 ## Install
-This project is developped using VisualStudio2019. Clone source code and create an C++ empty project, then copy these .h and .cpp files into your project.
+This project is developped using VisualStudio2019. Clone the source code and create an C++ empty project, then copy these .h and .cpp files into your project.
 ```sh
 $ git clone https://github.com/pisuto/EnhancedReflection.git
 ```
 
 ## Usage
-Including the header file `ref_define.h` and enabling reflection feature, for example `Node`.
+Include the header file `ref_define.h` and enable reflection feature, for example `Node`.
 ```c++
 struct Node {
     std::string key;
