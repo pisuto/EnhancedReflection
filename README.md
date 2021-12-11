@@ -36,7 +36,7 @@ REFLECT_STRUCT_MEMBER(value)
 REFLECT_STRUCT_MEMBER(children)
 REFLECT_STRUCT_END
 ```
-After finishing defining the struct, then construct `ref::format_helper` and choose the specific parser tool for the file to be resolved. This project provides three simple parser `ref::xml_parser` `ref::txt_parser` `ref::console_parser` whose names imply their corresponding formats. Finally, using member functions `write` and `read` provided by the helper achieves serializing and deserializing effects.
+After finishing defining the struct, then construct `ref::format_helper` and choose the specific parser tool for the file to be resolved. This project provides three simple parser `ref::xml_parser` `ref::txt_parser` `ref::console_parser` whose names imply their corresponding formats. In general, the three tools lack the functions that a powerful parser should have. So as to achieve special functions you want, you have to construct your own parser based on *class file_parser*. Finally, using member functions `write` and `read` provided by the helper achieves serializing and deserializing effects.
 ```c++
 /* choose one of the parsers by the format of file */
 ref::format_helper helper(new ref::xml_parser("setting.xml"));
