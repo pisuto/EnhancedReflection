@@ -1,13 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Base>
     <checked>false</checked>
-    <nodes>
+    <nodes1>
         <Node>
             <key>water</key>
             <value>4</value>
             <children></children>
         </Node>
-    </nodes>
+    </nodes1>
+    <nodes2>
+        <Node>
+            <key>orange</key>
+            <value>5</value>
+            <children></children>
+        </Node>
+        <Node>
+            <key>pink</key>
+            <value>6</value>
+            <children></children>
+        </Node>
+        <Node>
+            <key></key>
+            <value>0</value>
+            <children></children>
+        </Node>
+    </nodes2>
 </Base>
 <Node>
     <key>apple</key>

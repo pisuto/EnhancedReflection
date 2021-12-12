@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "ref_define.h"
+#include "reflection/ref_define.h"
 
 
 struct Node {
@@ -21,14 +21,16 @@ REFLECT_STRUCT_END
 
 struct Base {
     bool checked;
-    std::vector<Node> nodes;
+    std::vector<Node> nodes1;
+    Node nodes2[3];
 
     REFLECT(Base)
 };
 
 REFLECT_STRUCT_BEGIN(Base)
 REFLECT_STRUCT_MEMBER(checked)
-REFLECT_STRUCT_MEMBER(nodes)
+REFLECT_STRUCT_MEMBER(nodes1)
+REFLECT_STRUCT_MEMBER(nodes2)
 REFLECT_STRUCT_END
 
 int main()
@@ -37,7 +39,7 @@ int main()
 
     /* serialize */
     {
-        Base base = { false, {{"water", 4, {}}}};
+        Base base = { false, {{"water", 4, {}}}, {{"orange", 5, {}}, {"pink", 6, {}}, {}} };
 
         Node node = { "apple", 3, {{"banana", 7, {}}, {"cherry", 11, {}}} };
 

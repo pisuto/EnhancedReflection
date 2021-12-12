@@ -6,6 +6,7 @@
 namespace ref {
 
 	struct file_parser;
+	constexpr static const char* NULL_VALUE = "0";
 
 	/* ¹¤¾ß */
 	template<bool B, typename T = void>
@@ -38,7 +39,7 @@ namespace ref {
 		virtual ~type_descriptor() {}
 		virtual std::string full_name() const { return type_name; }
 		virtual void serialize(file_parser* parser, const void* obj, int level = 0) const = 0;
-		virtual void deserialize(std::string var, const void* obj, file_parser* parser, int level = 0) = 0;
+		virtual void deserialize(file_parser* parser, std::string var, const void* obj, int level = 0) = 0;
 
 		const char* type_name;
 		size_t type_size;

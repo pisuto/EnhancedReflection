@@ -7,7 +7,6 @@
 #include <stack>
 #include <list>
 #include <functional>
-#include <regex>
 
 namespace ref {
 
@@ -34,6 +33,7 @@ namespace ref {
 		virtual void write_class_end(std::string) = 0;
 		virtual mapping& operator[](std::string) = 0;
 
+		/* 根据不同的类型变化传值，子类重写不了父类的模板函数，因此只能一一写出 */
 		virtual void write_member_value(std::string type_name, int type_value) = 0;
 		virtual void write_member_value(std::string type_name, std::string type_value) = 0;
 		virtual void write_member_value(std::string type_name, bool type_value) = 0;
@@ -52,6 +52,7 @@ namespace ref {
 			if (size < 0) {
 				out << " {" << std::endl;
 			}
+			/* 为确保vector的大小，解析时用resize */
 			else if (size == 0) {
 				out << "[" << 0 << "]" << " {}";
 			}
@@ -93,6 +94,7 @@ namespace ref {
 			out << type_name << "{" << std::boolalpha << type_value << "}";
 		}
 
+		/* 粗糙地解析文件，没有对文件格式进行判断 */
 		virtual void read_file() override {
 			in.open(file_name, std::ios::in);
 			std::string line;
@@ -152,6 +154,7 @@ namespace ref {
 					}
 				}
 			}
+			/* 防止取不出数据没有返回值，因此加入一个null，但一般用不到 */
 			dic.emplace_back(std::make_pair("null", mapping{ "", 0, false }));
 			in.close();
 			is_read = true;
@@ -169,6 +172,7 @@ namespace ref {
 			is_wrote = false;
 		}
 
+		/* 按从最开始到最后加入的顺序读取数据 */
 		mapping& operator[](std::string index) {
 			for (auto it = dic.begin(); it != dic.end(); it++)
 			{
@@ -242,6 +246,7 @@ namespace ref {
 			return true;
 		}
 
+		/* 控制台读不了数据 */
 		virtual void read_file() override {}
 
 		virtual void write_file() override {}
@@ -254,7 +259,7 @@ namespace ref {
 		}
 	};
 
-	/* xml结构体，不存储attr */
+	/* xml结构体，不存储attr，每一个节点只认为可能有子节点和text，简化读取 */
 	enum class XML_STRU_TYPE {
 		/* 错误码 */
 		XML_ERROR_NO_RIGHT_ARROR,
@@ -284,6 +289,7 @@ namespace ref {
 		xml_text text;
 		std::list<xml_node> xml_nodes;
 
+		/* 用于和定义的null_node进行比较 */
 		bool operator==(const xml_node& rhs) {
 			if (text.name == rhs.text.name &&
 				text.value.value == rhs.text.value.value &&
@@ -353,9 +359,10 @@ namespace ref {
 						if (ras != std::string::npos) {
 							auto rae /* right arrow end */ = line.find_first_of('>', ras);
 							if (rae != std::string::npos) {
+								/* 读取到<>...</>节点时将其压入上一个父节点 */
 								auto node_name = line.substr(ras + 2, rae - ras - 2);
 								if (node_name == node.text.name) {
-									std::string value = lae + 1 != ras? line.substr(lae + 1, ras - lae - 1) : "0";
+									std::string value = lae + 1 != ras? line.substr(lae + 1, ras - lae - 1) : NULL_VALUE;
 									node.text.value = { value, 0, false };
 									xml_store_nodes.top().xml_nodes.push_back(node);
 									return XML_STRU_TYPE::XML_NODE;
@@ -364,11 +371,13 @@ namespace ref {
 							}
 						}
 						else {
+							/* 当碰到<>标签时创建新的节点压入栈 */
 							xml_store_nodes.push(node);
 							return XML_STRU_TYPE::XML_HEAD;
 						}
 					}
 					else {
+						/* 碰到</>标签时将最后一个节点弹出并压入父节点 */
 						auto temp = xml_store_nodes.top();
 						node.text.name = line.substr(las + 2, lae - las - 2);
 						node.text.value.level = xml_store_nodes.size() - 1;
@@ -517,6 +526,7 @@ namespace ref {
 			return end_arr_names.empty() && end_var_name.empty();
 		}
 
+		/* 使用递归的方法进行遍历 */
 		xml_node& check_if_unchecked_node(std::string& index, xml_node& node) {
 			if (!node.text.value.checked && !node.text.value.value.empty() && index == node.text.name) {
 				return node;

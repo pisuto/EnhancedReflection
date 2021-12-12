@@ -6,7 +6,7 @@
 #include <cstddef>
 
 #include "ref_base.h"
-#include "ref_helper.h"
+#include "../tool/ref_helper.h"
 
 namespace ref {
 
@@ -43,10 +43,10 @@ namespace ref {
 			parser->write_class_end(full_name());
 		}
 
-		virtual void deserialize(std::string var, const void* obj, file_parser* parser, int level) override {
+		virtual void deserialize(file_parser* parser, std::string var, const void* obj, int level) override {
 			for (auto& element : members)
 			{
-				element.type_desc->deserialize(element.var_name, (char*)obj + element.offset, parser , level + 1);
+				element.type_desc->deserialize(parser, element.var_name, (char*)obj + element.offset , level + 1);
 			}
 		}
 	};
@@ -102,7 +102,7 @@ namespace ref {
 			parser->write_class_end(full_name());
 		}
 
-		virtual void deserialize(std::string var, const void* obj, file_parser* parser, int level) override {
+		virtual void deserialize(file_parser* parser, std::string var, const void* obj, int level) override {
 			auto& tmp = (*parser)[var];
 			if (tmp.checked || tmp.value.empty()) {
 				return;
@@ -111,7 +111,7 @@ namespace ref {
 			auto size = resize(obj, std::stoi(tmp.value));	
 			for (size_t index = 0; index < size; ++index)
 			{
-				item_type->deserialize(item_type->full_name(), get_item(obj, index), parser, level);
+				item_type->deserialize(parser, item_type->full_name(), get_item(obj, index), level);
 			}
 		}
 	};
@@ -121,6 +121,65 @@ namespace ref {
 		static type_descriptor* get() {
 			static type_struct_vector type_vector((T*)(nullptr));
 			return &type_vector;
+		}
+	};
+
+	/* 描述数组类型 */
+	struct type_struct_array : type_descriptor {
+		using get_item_func_ptr = const void* (*)(const void*, size_t);
+		
+		size_t size;
+		type_descriptor* item_type;
+		get_item_func_ptr get_item;
+
+		template<typename Item>
+		type_struct_array(Item*, size_t capacity) : type_descriptor("array", sizeof(Item) * capacity), 
+			item_type(type_resolver<Item>::get()), size(capacity) {
+			
+			get_item = [](const void* arr_ptr, size_t index) -> const void* {
+				const auto arr = (const Item*)arr_ptr;
+				return &arr[index];
+			};
+		}
+
+		virtual std::string full_name() const override {
+			return std::string("array<") + item_type->full_name() + ">";
+		}
+
+		virtual void serialize(file_parser* parser, const void* obj, int level) const override {
+			parser->write_class_name(full_name(), level, size);
+			if (size == 0) {
+				return;
+			}
+
+			for (size_t index = 0; index < size; ++index)
+			{
+				parser->write_ident_space(level + 1);
+				item_type->serialize(parser, get_item(obj, index), level + 1);
+				parser->write_enter();
+			}
+			parser->write_ident_space(level);
+			parser->write_class_end(full_name());
+		}
+
+		virtual void deserialize(file_parser* parser, std::string var, const void* obj, int level) override {
+			auto& tmp = (*parser)[var];
+			if (tmp.checked || tmp.value.empty()) {
+				return;
+			}
+			tmp.checked = true;
+			for (size_t index = 0; index < size; ++index)
+			{
+				item_type->deserialize(parser, item_type->full_name(), get_item(obj, index), level);
+			}
+		}
+	};
+
+	template<typename T, size_t N>
+	struct type_resolver<T[N]> {
+		static type_descriptor* get() {
+			static type_struct_array type_array((T*)nullptr, N);
+			return &type_array;
 		}
 	};
 
@@ -154,7 +213,7 @@ namespace ref {
 		virtual void serialize(ref::file_parser* parser, const void* obj, int) const override { \
 			parser->write_member_value(#type, *(const type*)obj); \
 		} \
-		virtual void deserialize(std::string var, const void* obj, file_parser* parser, int) override { \
+		virtual void deserialize(file_parser* parser, std::string var, const void* obj, int) override { \
 			auto type_obj = (type_pointer)obj; \
 			*type_obj = string_to_data<type_class>((*parser)[var].value); \
 			(*parser)[var].checked = true; \

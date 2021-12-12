@@ -11,7 +11,7 @@ namespace ref {
 
 	template<>
 	std::string string_to_data<std::string>(std::string data) {
-		return data;
+		return data == NULL_VALUE ? "" : data;
 	}
 
 	template<>
