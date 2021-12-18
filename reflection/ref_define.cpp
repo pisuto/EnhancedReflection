@@ -19,7 +19,14 @@ namespace ref {
 		return data == "true";
 	}
 
+	template<>
+	size_t string_to_data<size_t>(std::string data) {
+		if (data.empty() || data.front() == '-') return 0;
+		return static_cast<size_t>(std::stoi(data));
+	}
+
 	REFLECT_TYPE(int)
+	REFLECT_TYPE(size_t)
 	REFLECT_TYPE(bool)
 	REFLECT_TYPE(string)
 

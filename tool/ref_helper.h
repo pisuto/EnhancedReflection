@@ -44,7 +44,6 @@ namespace ref {
 			}
 			auto type_desc = ref::type_resolver<T>::get();
 			type_desc->serialize(parser, &data);
-			parser->write_enter(); /* 区分每一个类 */
 			write(args...);
 		}
 

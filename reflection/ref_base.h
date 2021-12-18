@@ -1,48 +1,32 @@
 #pragma once
 
-#include <string>
 #include <fstream>
+
+#include "ref_traits.h"
 
 namespace ref {
 
 	struct file_parser;
-	constexpr static const char* NULL_VALUE = "0";
+	struct type_descriptor;
 
-	/* 工具 */
-	template<bool B, typename T = void>
-	struct type_enable_if {};
-
-	template<typename T>
-	struct type_enable_if<true, T> {
-		using type = T;
-	};
-
-	template<bool B, typename T = void>
-	using type_enable_if_t = typename type_enable_if<B, T>::type;
-
-	template<typename T>
-	struct type_is_reflected {
-		using Yes = char;
-		struct No { char dummy[2]; };
-		template<typename Y>
-		static Yes test(decltype(&Y::reflection));
-		template<typename Y>
-		static No test(...);
-
-		enum { value = (sizeof(test<T>(nullptr)) == sizeof(Yes)) };
+	struct type_member {
+		const char* var_name;
+		size_t offset;
+		type_descriptor* type_desc;
 	};
 
 	/* 类型描述 */
 	struct type_descriptor {
-		type_descriptor(const char* name, size_t size) :
-			type_name(name), type_size(size) {}
+		type_descriptor(const char* name, size_t size, TYPE_CLASSIFY kind) :
+			type_name(name), type_size(size), type_class(kind) {}
 		virtual ~type_descriptor() {}
 		virtual std::string full_name() const { return type_name; }
-		virtual void serialize(file_parser* parser, const void* obj, int level = 0) const = 0;
+		virtual void type_members(std::vector<type_member>&) {}; /* override for customize struct */
+		virtual void serialize(file_parser* parser, const void* obj, int level = 1) = 0;
 		virtual void deserialize(file_parser* parser, std::string var, const void* obj, int level = 0) = 0;
-
 		const char* type_name;
 		size_t type_size;
+		TYPE_CLASSIFY type_class;
 	};
 
 	/* string转数据 */
