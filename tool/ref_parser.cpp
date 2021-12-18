@@ -81,7 +81,7 @@ namespace ref {
 	void xml_parser::write_customize_type(type_descriptor*  type_desc, const void* obj, int level)
 	{
 		bool var_exist = true;
-		if (tmp_var_name.empty() || is_array) {
+		if (condition.var_name.empty() || condition.is_array) {
 			out << std::string(4 * level, ' ') << "<" << type_desc->full_name() << ">" << std::endl;
 			var_exist = false;
 		}
@@ -92,9 +92,9 @@ namespace ref {
 			if (check_if_customize_type(member.type_desc->type_class)) {
 				out << std::endl;
 			}
-			tmp_var_name = member.var_name;
+			condition.var_name = member.var_name;
 			member.type_desc->serialize(this, (char*)obj + member.offset, level + 1);
-			tmp_var_name.clear();
+			condition.var_name.clear();
 			if (check_if_customize_type(member.type_desc->type_class)) {
 				out << std::string(4 * (level + 1), ' ');
 			}
@@ -112,7 +112,7 @@ namespace ref {
 			return;
 		}
 		bool first_time = false;
-		is_array = true;
+		condition.is_array = true;
 		out << std::endl;
 		for (size_t index = 0; index < size; ++index) {
 			if (check_if_native_type(type_desc->type_class)) {
@@ -132,7 +132,7 @@ namespace ref {
 			out << std::endl;
 		}
 		out << std::string(4 * (level), ' ');
-		is_array = false;
+		condition.is_array = false;
 	}
 
 	void txt_parser::read_file()

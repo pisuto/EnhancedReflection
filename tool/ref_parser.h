@@ -246,7 +246,13 @@ namespace ref {
 	/* xmlÎÄ¼þ¶ÁÈë */
 	class xml_parser : public file_parser {
 	public:
-		xml_parser(std::string name) : file_parser(name), tmp_var_name(""), is_array(false) {
+
+		struct full_condition {
+			std::string var_name;
+			bool is_array;
+		};
+
+		xml_parser(std::string name) : file_parser(name), condition{"", false} {
 			null_node = {};
 			null_node.text.value.level = -1;
 		}
@@ -341,8 +347,7 @@ namespace ref {
 
 		std::stack<std::string> end_arr_names;
 
-		std::string tmp_var_name;
-		bool is_array;
+		full_condition condition;
 
 		xml_node null_node;
 	};
