@@ -12,11 +12,6 @@ namespace ref {
 		return type_class == TYPE_CLASSIFY::TYPE_CUSTOMIZE;
 	}
 
-	bool check_if_array(const TYPE_CLASSIFY& type_class) {
-		return type_class == TYPE_CLASSIFY::TYPE_CUSTOMIZE_ARRAY ||
-			type_class == TYPE_CLASSIFY::TYPE_STL_ARRAY;
-	}
-
 	void txt_parser::write_customize_type(type_descriptor* type_desc, const void* obj, int level)
 	{
 		out << type_desc->full_name() << " {" << std::endl;
@@ -81,6 +76,7 @@ namespace ref {
 	void xml_parser::write_customize_type(type_descriptor*  type_desc, const void* obj, int level)
 	{
 		bool var_exist = true;
+		/* 有var_name表示其是结构的成员，无须再显示，否则会使得文件太过冗杂，同时需考虑数组类型 */
 		if (condition.var_name.empty() || condition.is_array) {
 			out << std::string(4 * level, ' ') << "<" << type_desc->full_name() << ">" << std::endl;
 			var_exist = false;
@@ -89,6 +85,7 @@ namespace ref {
 		type_desc->type_members(members);
 		for (const type_member& member : members) {
 			out << std::string(4 * (level + 1), ' ') << "<" << member.var_name << ">";
+			/* 数组类型元素为0时和内置类型显示方法一致 */
 			if (check_if_customize_type(member.type_desc->type_class)) {
 				out << std::endl;
 			}
@@ -111,10 +108,11 @@ namespace ref {
 		if (size == 0) {
 			return;
 		}
-		bool first_time = false;
-		condition.is_array = true;
+		bool first_time = false; /* 去除换行符的影响 */
+		condition.is_array = true; 
 		out << std::endl;
 		for (size_t index = 0; index < size; ++index) {
+			/* 考虑数组元素的内置类型显示形式和自定义类型一致 */
 			if (check_if_native_type(type_desc->type_class)) {
 				if (first_time) {
 					out << std::endl;
@@ -160,6 +158,7 @@ namespace ref {
 					auto pos2 = value.find_last_not_of(" ");
 					if (pos1 == std::string::npos && pos2 == std::string::npos)
 					{
+						/* 通过[]获取数组类型的大小 */
 						pos1 = line.find_first_of("[");
 						pos2 = line.find_first_of("]");
 						if (pos1 != std::string::npos && pos2 != std::string::npos)

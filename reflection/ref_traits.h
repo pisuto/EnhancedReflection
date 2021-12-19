@@ -1,12 +1,12 @@
 #pragma once
 
-#include<string>
+#include <string>
+#include <list>
 
 namespace ref {
 
 	constexpr static const char* NULL_VALUE = "0";
 
-	/* 工具 */
 	template<bool B, typename T = void>
 	struct type_enable_if {};
 
@@ -32,11 +32,11 @@ namespace ref {
 
 	enum class  TYPE_CLASSIFY {
 		TYPE_NULL,
-		TYPE_CUSTOMIZE,
-		TYPE_CUSTOMIZE_ARRAY,
-		TYPE_PRIMITIVE,
-		TYPE_STL,
-		TYPE_STL_ARRAY,
+		TYPE_CUSTOMIZE,        /* 自定义类型 */
+		TYPE_CUSTOMIZE_ARRAY,  /* 自定义数组 */
+		TYPE_PRIMITIVE,        /* 内置类型 */
+		TYPE_STL,              /* STL类型 */
+		TYPE_STL_ARRAY,        /* STL容器 */
 	};
 
 	template<typename T>
@@ -50,7 +50,17 @@ namespace ref {
 	};
 
 	template<>
+	struct type_is_customize<unsigned char> {
+		constexpr static auto value = TYPE_CLASSIFY::TYPE_PRIMITIVE;
+	};
+
+	template<>
 	struct type_is_customize<int> {
+		constexpr static auto value = TYPE_CLASSIFY::TYPE_PRIMITIVE;
+	};
+
+	template<>
+	struct type_is_customize<char> {
 		constexpr static auto value = TYPE_CLASSIFY::TYPE_PRIMITIVE;
 	};
 
@@ -76,6 +86,11 @@ namespace ref {
 
 	template<typename T>
 	struct type_is_customize<std::vector<T>> {
+		constexpr static auto value = TYPE_CLASSIFY::TYPE_STL_ARRAY;
+	};
+
+	template<typename T>
+	struct type_is_customize<std::list<T>> {
 		constexpr static auto value = TYPE_CLASSIFY::TYPE_STL_ARRAY;
 	};
 

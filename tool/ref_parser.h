@@ -32,7 +32,8 @@ namespace ref {
 		virtual void write_file_finished() = 0;
 		virtual void write_customize_type(type_descriptor*, const void*, int) = 0;
 		virtual void write_primitive_array_type(type_descriptor*, get_item_func_ptr, int, const void*, int) = 0;
-		
+		virtual void write_next_type() {}
+
 		virtual mapping& operator[](std::string) = 0;
 
 		/* 根据不同的类型变化传值，子类重写不了父类的模板函数，因此只能一一写出 */
@@ -73,6 +74,10 @@ namespace ref {
 		template<typename T>
 		void write_primitive_type_template(std::string type_name, T type_value) {
 			out << type_name << "{" << std::boolalpha << type_value << "}";
+		}
+
+		virtual void write_next_type() override {
+			out << std::endl;
 		}
 
 		/* 粗糙地解析文件，没有对文件格式进行判断 */
@@ -136,6 +141,10 @@ namespace ref {
 		template<typename T>
 		void write_primitive_type_template(std::string type_name, T type_value) {
 			std::cout << type_name << "{" << std::boolalpha << type_value << "}";
+		}
+
+		virtual void write_next_type() override {
+			std::cout << std::endl;
 		}
 
 		virtual bool is_read_file() const override {
@@ -247,7 +256,7 @@ namespace ref {
 	class xml_parser : public file_parser {
 	public:
 
-		struct full_condition {
+		struct show_condition {
 			std::string var_name;
 			bool is_array;
 		};
@@ -295,7 +304,6 @@ namespace ref {
 		}
 
 		virtual void write_file() override {
-			// dic.clear(); /* 每一次读入时就清空，需要重新读入 */
 			out.open(file_name, std::ios::out);
 			out << "<?xml version=\"1.0\"?>" << std::endl << "<reflection>" << std::endl;
 			is_wrote = true;
@@ -345,9 +353,11 @@ namespace ref {
 		std::ofstream out;
 		xml_doc xml_file;
 
+		/* 解析.xml时用于存储结束符的栈 */
 		std::stack<std::string> end_arr_names;
 
-		full_condition condition;
+		/* 用于关闭显示节点名称，数组类型除外 */
+		show_condition condition;
 
 		xml_node null_node;
 	};

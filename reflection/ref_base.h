@@ -9,6 +9,7 @@ namespace ref {
 	struct file_parser;
 	struct type_descriptor;
 
+	/* 成员类型 */
 	struct type_member {
 		const char* var_name;
 		size_t offset;
@@ -21,11 +22,12 @@ namespace ref {
 			type_name(name), type_size(size), type_class(kind) {}
 		virtual ~type_descriptor() {}
 		virtual std::string full_name() const { return type_name; }
-		virtual void type_members(std::vector<type_member>&) {}; /* override for customize struct */
+		virtual void type_members(std::vector<type_member>&) {}; /* 自定义类型须重写 */
 		virtual void serialize(file_parser* parser, const void* obj, int level = 1) = 0;
 		virtual void deserialize(file_parser* parser, std::string var, const void* obj, int level = 0) = 0;
 		const char* type_name;
 		size_t type_size;
+		/* 类型分类 */
 		TYPE_CLASSIFY type_class;
 	};
 
