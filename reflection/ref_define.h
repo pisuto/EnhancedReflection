@@ -4,7 +4,6 @@
 #include <iostream>
 #include <map>
 #include <cstddef>
-#include <type_traits>
 
 #include "ref_base.h"
 #include "../tool/ref_helper.h"
