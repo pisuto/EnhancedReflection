@@ -77,9 +77,10 @@ namespace ref {
 	{
 		bool var_exist = true;
 		/* 有var_name表示其是结构的成员，无须再显示，否则会使得文件太过冗杂，同时需考虑数组类型 */
-		if (condition.var_name.empty() || condition.is_array) {
+		if (condition.end_var_names.empty() || condition.is_array) {
 			out << std::string(4 * level, ' ') << "<" << type_desc->full_name() << ">" << std::endl;
 			var_exist = false;
+			condition.is_array = false;
 		}
 		std::vector<type_member> members;
 		type_desc->type_members(members);
@@ -89,9 +90,9 @@ namespace ref {
 			if (check_if_customize_type(member.type_desc->type_class)) {
 				out << std::endl;
 			}
-			condition.var_name = member.var_name;
+			condition.end_var_names.push(member.var_name);
 			member.type_desc->serialize(this, (char*)obj + member.offset, level + 1);
-			condition.var_name.clear();
+			condition.end_var_names.pop();
 			if (check_if_customize_type(member.type_desc->type_class)) {
 				out << std::string(4 * (level + 1), ' ');
 			}

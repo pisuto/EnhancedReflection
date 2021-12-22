@@ -257,11 +257,11 @@ namespace ref {
 	public:
 
 		struct show_condition {
-			std::string var_name;
 			bool is_array;
+			std::stack<std::string> end_var_names;
 		};
 
-		xml_parser(std::string name) : file_parser(name), condition{"", false} {
+		xml_parser(std::string name) : file_parser(name), condition{false, {}} {
 			null_node = {};
 			null_node.text.value.level = -1;
 		}
